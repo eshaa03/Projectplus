@@ -1,0 +1,123 @@
+/* Page background with image */
+.login-page {
+  min-height: 100vh;
+  background: url('../assets/images/login-bg.jpg') center/cover no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Inter", sans-serif;
+}
+
+/* Optional overlay for better contrast */
+.login-page::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3); /* semi-transparent dark overlay */
+  z-index: 0;
+}
+
+/* Card */
+.login-card {
+  width: 380px;
+  background: #ffffff; /* clean white card */
+  padding: 32px;
+  border-radius: 16px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  z-index: 1; /* above overlay */
+  position: relative;
+  color: #111827;
+}
+
+/* Title */
+.login-title {
+  font-size: 26px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 4px;
+}
+
+/* Subtitle */
+.login-subtitle {
+  font-size: 14px;
+  text-align: center;
+  color: #6b7280; /* gray-500 */
+  margin-bottom: 24px;
+}
+
+/* Form */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.input-group label {
+  font-size: 13px;
+  color: #374151; /* gray-700 */
+}
+
+.input-group input {
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid #d1d5db; /* gray-300 */
+  outline: none;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.input-group input:focus {
+  border-color: #3b82f6; /* blue accent */
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* Button */
+.login-btn {
+  margin-top: 10px;
+  height: 46px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(90deg, #3b82f6, #9333ea);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.login-btn:hover {
+  background: linear-gradient(90deg, #2563eb, #7e22ce);
+}
+
+/* Bottom text */
+.signup-text {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 13px;
+  color: #6b7280; /* gray-500 */
+}
+
+.signup-text span {
+  color: #3b82f6;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.signup-text span:hover {
+  color: #2563eb;
+  text-decoration: underline;
+}

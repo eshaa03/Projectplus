@@ -1,0 +1,128 @@
+/* Page background with image */
+.register-container {
+  min-height: 100vh;
+  background: url('../assets/images/register-bg.jpg') center/cover no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Inter", sans-serif;
+  position: relative;
+}
+
+/* Optional overlay for better contrast */
+.register-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.25);
+  z-index: 0;
+}
+
+/* Card */
+.register-card {
+  width: 420px;
+  background: #ffffff; /* white card */
+  padding: 32px;
+  border-radius: 16px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  z-index: 1; /* above overlay */
+  position: relative;
+  color: #111827;
+}
+
+/* Heading */
+.register-title {
+  text-align: center;
+  margin-bottom: 6px;
+  font-size: 26px;
+  font-weight: 700;
+  color: #1e3a8a; /* sidebar/nav primary color */
+}
+
+/* Subtitle */
+.register-subtitle {
+  text-align: center;
+  font-size: 14px;
+  color: #64748b; /* gray-500 */
+  margin-bottom: 24px;
+}
+
+/* Form */
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Input group */
+.register-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.register-group label {
+  font-size: 13px;
+  margin-bottom: 6px;
+  color: #374151; /* gray-700 */
+}
+
+/* Input field */
+.register-group input {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #d1d5db; /* gray-300 */
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.register-group input:focus {
+  outline: none;
+  border-color: #3b82f6; /* blue accent */
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* Button */
+.register-btn {
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  font-size: 15px;
+  font-weight: 600;
+  color: #ffffff;
+  background: linear-gradient(90deg, #3b82f6, #9333ea); /* sidebar/nav gradient */
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.register-btn:hover {
+  background: linear-gradient(90deg, #2563eb, #7e22ce);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(59, 130, 246, 0.35);
+}
+
+/* Login redirect */
+.login-link {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 14px;
+  color: #64748b; /* gray-500 */
+}
+
+.login-link span {
+  color: #3b82f6;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.login-link span:hover {
+  color: #2563eb;
+  text-decoration: underline;
+}

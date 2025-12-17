@@ -1,0 +1,12 @@
+.task-card {
+  background: white;
+  padding: 16px;
+  margin: 15px;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+
+.task-card span {
+  font-size: 13px;
+  color: #2563eb;
+}

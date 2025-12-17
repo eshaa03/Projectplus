@@ -1,0 +1,124 @@
+/* Outer layout */
+.settings-page {
+  background-color: #f5f5f5;
+  min-height: 100vh;
+  padding: 20px 5px;
+  display: flex;
+  justify-content: flex-start;
+  font-family: "Inter", sans-serif;
+  margin-left: 0.2rem;
+  margin-right: -1.5rem;
+  margin-top: 1rem;
+}
+
+/* Main card styled like task-page-card */
+.settings-card {
+  background: linear-gradient(180deg, #ffffff 0%, #e9efff 100%);
+  width: calc(100% + 10px);
+  border-radius: 1.5rem;
+  padding: 40px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  margin-left: -25px;
+  margin-right: -30px;
+  margin-top: -45px;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.settings-card h2 {
+  color: #004a8f;
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+/* Profile Picture */
+.profile-pic-section {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.profile-img {
+  width: 120px;
+  height: 120px;
+  border-radius: 100%;
+  object-fit: cover;
+  border: 4px solid #cbd5e1;
+}
+
+.upload-btn {
+  background-color: #3b82f6;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.2s ease;
+}
+
+.upload-btn:hover {
+  background-color: #2563eb;
+}
+
+/* Form Fields */
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: #111827;
+}
+
+.form-group input {
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #d1d5db;
+  font-size: 15px;
+}
+
+/* Buttons */
+.form-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.save-btn {
+  background-color: #10b981;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 12px;
+  border: none;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.save-btn:hover {
+  background-color: #059669;
+}
+
+.cancel-btn {
+  background-color: #9ca3af;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 12px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cancel-btn:hover {
+  background-color: #6b7280;
+}

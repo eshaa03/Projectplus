@@ -1,0 +1,159 @@
+/* Page wrapper */
+.projects-page {
+  background-color: #f5f5f5;
+  min-height: 100vh;
+  padding: 20px 5px; /* same as task page */
+  display: flex;
+  justify-content: flex-start;
+  font-family: "Inter", sans-serif;
+  margin-left: 0.2rem;
+  margin-right: -1.5rem; 
+  margin-top: 1rem;
+}
+
+/* Card container */
+.projects-card {
+  background: linear-gradient(180deg, #ffffff 0%, #e9efff 100%);
+  width: calc(100% + 10px); /* same width as task card */
+  border-radius: 1.5rem;
+  padding: 40px;  
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  /* same alignment adjustments */
+  margin-left: -25px;
+  margin-right: -30px;
+  margin-top: -45px;
+}
+
+/* Title */
+.projects-title {
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: #111827;
+}
+
+/* Add project input row */
+.add-project {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 25px;
+}
+
+.add-project input {
+  flex: 1;
+  padding: 12px 15px;
+  border-radius: 12px;
+  border: 1px solid #d1d5db;
+  font-size: 15px;
+  transition: all 0.25s ease;
+}
+
+.add-project input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+  outline: none;
+}
+
+/* Add project button */
+.add-project button {
+  padding: 12px 20px;
+  background: linear-gradient(90deg, #3b82f6, #9333ea);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.add-project button:hover {
+  background: linear-gradient(90deg, #2563eb, #7e22ce);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(59, 130, 246, 0.35);
+}
+
+/* Project grid */
+.projects-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 18px;
+}
+
+/* Individual project card */
+.project-card {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.05);
+  transition: all 0.25s ease;
+}
+
+.project-card:hover {
+  transform: translateY(-4px);
+  border-color: #3b82f6;
+  box-shadow: 0 12px 28px rgba(59, 130, 246, 0.2);
+}
+
+.project-card h3 {
+  margin: 0 0 15px 0;
+  color: #1e3a8a;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* Buttons inside card */
+.project-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.project-actions button {
+  flex: 1;
+  padding: 8px 10px;
+  font-size: 14px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.project-actions button:first-child {
+  background: linear-gradient(90deg, #3b82f6, #9333ea);
+  color: #fff;
+}
+
+.project-actions button:first-child:hover {
+  background: linear-gradient(90deg, #2563eb, #7e22ce);
+}
+
+.project-actions button:last-child {
+  background-color: #ef4444;
+  color: white;
+}
+
+.project-actions button:last-child:hover {
+  background-color: #dc2626;
+}
+
+/* Timestamps */
+.timestamp {
+  font-size: 12px;
+  color: #555;
+  margin: 3px 0;
+}
+
+/* Edit input */
+.edit-input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #004a8f;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
