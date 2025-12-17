@@ -35,8 +35,7 @@ exports.createProject = async (req, res) => {
     const project = await Project.create({
       name,
       user: userId,
-      createdAt: new Date(),
-      editedAt: new Date()
+      createdAt: new Date()
     });
 
     res.status(201).json(project);

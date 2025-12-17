@@ -8,8 +8,7 @@ const taskSchema = new mongoose.Schema({
   enum: ["pending", "completed", "in-progress"],
   lowercase: true,
   required: true
-}
-,
+},
   projectId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Project",
