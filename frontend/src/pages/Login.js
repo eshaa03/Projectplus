@@ -13,50 +13,52 @@ export default function Login() {
   const [password, setPassword] = useState("");
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const trimmedEmail = email.trim();
+  const trimmedEmail = email.trim();
 
-    // ✅ Validations
-    if (!trimmedEmail) {
-      toast.error("Email is required");
-      return;
-    }
+  if (!trimmedEmail) {
+    toast.error("Email is required");
+    return;
+  }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(trimmedEmail)) {
-      toast.error("Invalid email format");
-      return;
-    }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(trimmedEmail)) {
+    toast.error("Invalid email format");
+    return;
+  }
 
-    if (!password) {
-      toast.error("Password is required");
-      return;
-    }
+  if (!password) {
+    toast.error("Password is required");
+    return;
+  }
 
-    try {
-      const res = await fetch("http://localhost:5000/api/auth/login", {
+  try {
+    const res = await fetch(
+      `${process.env.REACT_APP_API_URL}/api/auth/login`,
+      {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: trimmedEmail, password }),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        localStorage.setItem("token", data.token);
-        setToken(data.token);
-        setUser(data.user);
-        toast.success("Login successful! Redirecting...");
-        setTimeout(() => navigate("/dashboard"), 1000);
-      } else {
-        toast.error(data.message || "Login failed");
       }
-    } catch (err) {
-      console.error(err);
-      toast.error("Server error. Please try again later.");
+    );
+
+    const data = await res.json();
+
+    if (res.ok) {
+      localStorage.setItem("token", data.token);
+      setToken(data.token);
+      setUser(data.user);
+      toast.success("Login successful! Redirecting...");
+      setTimeout(() => navigate("/dashboard"), 1000);
+    } else {
+      toast.error(data.message || "Login failed");
     }
-  };
+  } catch (err) {
+    console.error(err);
+    toast.error("Server error. Please try again later.");
+  }
+};
 
   return (
     <div className="login-page">

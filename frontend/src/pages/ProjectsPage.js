@@ -4,8 +4,6 @@ import "./ProjectsPage.css";
 import { FiX, FiFilter, FiEdit, FiTrash2, FiEye } from "react-icons/fi";
 import { AiOutlineCheck } from "react-icons/ai";
 
-
-
 function ProjectsPage() {
   const [projects, setProjects] = useState([]);
   const [newProject, setNewProject] = useState("");
@@ -15,62 +13,64 @@ function ProjectsPage() {
   const [openFilter, setOpenFilter] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState(null);
+
+  const API_URL = process.env.REACT_APP_API_URL;
+
   // Fetch projects and tasks
   const fetchProjects = useCallback(async () => {
-  try {
-    const res = await fetch("http://localhost:5000/api/projects", {
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-    });
-    const data = await res.json();
+    try {
+      const res = await fetch(`${API_URL}/api/projects`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      const data = await res.json();
 
-    const projectsWithTasks = await Promise.all(
-      data.map(async (proj) => {
-        const taskRes = await fetch(
-          `http://localhost:5000/api/tasks?projectId=${proj._id}`,
-          {
-            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      const projectsWithTasks = await Promise.all(
+        data.map(async (proj) => {
+          const taskRes = await fetch(
+            `${API_URL}/api/tasks?projectId=${proj._id}`,
+            {
+              headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+            }
+          );
+          const tasks = await taskRes.json();
+          const tasksWithProject = tasks.map((t) => ({
+            ...t,
+            projectName: proj.name,
+          }));
+
+          let status = "Pending";
+          if (tasks.length > 0) {
+            const allCompleted = tasks.every(
+              (t) => t.status.toLowerCase() === "completed"
+            );
+            const allPending = tasks.every(
+              (t) => t.status.toLowerCase() === "pending"
+            );
+            status = allCompleted
+              ? "Completed"
+              : allPending
+              ? "Pending"
+              : "Ongoing";
           }
-        );
-        const tasks = await taskRes.json();
-        const tasksWithProject = tasks.map((t) => ({
-          ...t,
-          projectName: proj.name,
-        }));
 
-        let status = "Pending";
-        if (tasks.length > 0) {
-          const allCompleted = tasks.every(
-            (t) => t.status.toLowerCase() === "completed"
-          );
-          const allPending = tasks.every(
-            (t) => t.status.toLowerCase() === "pending"
-          );
-          status = allCompleted
-            ? "Completed"
-            : allPending
-            ? "Pending"
-            : "Ongoing";
-        }
+          return { ...proj, status, tasks: tasksWithProject };
+        })
+      );
 
-        return { ...proj, status, tasks: tasksWithProject };
-      })
-    );
+      setProjects(projectsWithTasks);
+    } catch (err) {
+      console.error("Failed to fetch projects:", err);
+    }
+  }, [API_URL]);
 
-    setProjects(projectsWithTasks);
-  } catch (err) {
-    console.error("Failed to fetch projects:", err);
-  }
-}, []);
-
-
-useEffect(() => {
-  fetchProjects();
-}, [fetchProjects]);
+  useEffect(() => {
+    fetchProjects();
+  }, [fetchProjects]);
 
   const addProject = async () => {
     if (!newProject.trim()) return;
     try {
-      const res = await fetch("http://localhost:5000/api/projects", {
+      const res = await fetch(`${API_URL}/api/projects`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -88,7 +88,7 @@ useEffect(() => {
 
   const deleteProject = async (id) => {
     try {
-      await fetch(`http://localhost:5000/api/projects/${id}`, {
+      await fetch(`${API_URL}/api/projects/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
@@ -105,7 +105,7 @@ useEffect(() => {
 
   const saveEdit = async (id) => {
     try {
-      await fetch(`http://localhost:5000/api/projects/${id}`, {
+      await fetch(`${API_URL}/api/projects/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -134,12 +134,11 @@ useEffect(() => {
       : projects.filter((p) => p.status === filterStatus);
 
   const getEmptyProjectMessage = () => {
-  if (filterStatus === "Completed") return "No completed projects.";
-  if (filterStatus === "Ongoing") return "No ongoing projects.";
-  if (filterStatus === "Pending") return "No pending projects.";
-  return "No projects yet.";
-};
-
+    if (filterStatus === "Completed") return "No completed projects.";
+    if (filterStatus === "Ongoing") return "No ongoing projects.";
+    if (filterStatus === "Pending") return "No pending projects.";
+    return "No projects yet.";
+  };
 
   return (
     <div className="projects-page">
@@ -195,7 +194,6 @@ useEffect(() => {
           </div>
         </div>
 
-        {/* Add Project */}
         <div className="add-project">
           <input
             type="text"
@@ -211,7 +209,6 @@ useEffect(() => {
           <button onClick={addProject}>Add Project</button>
         </div>
 
-        {/* List Projects */}
         <div className="projects-list">
           {filteredProjects.map((project) => (
             <div key={project._id} className="project-card">
@@ -291,60 +288,58 @@ useEffect(() => {
                 </button>
 
                 <button
-                      title="Delete Project"
-                      onClick={() => {
-                        setProjectToDelete(project);
-                        setShowConfirm(true);
-                      }}
-                    >
+                  title="Delete Project"
+                  onClick={() => {
+                    setProjectToDelete(project);
+                    setShowConfirm(true);
+                  }}
+                >
                   <FiTrash2 />
                 </button>
-
               </div>
             </div>
           ))}
           {filteredProjects.length === 0 && (
-  <p className="no-task">{getEmptyProjectMessage()}</p>
-)}
-
+            <p className="no-task">{getEmptyProjectMessage()}</p>
+          )}
         </div>
       </div>
+
       {showConfirm && (
-  <div className="confirm-overlay">
-    <div className="confirm-box">
-      <h3>Delete Project?</h3>
-      <p>
-        Are you sure you want to delete{" "}
-        <strong>{projectToDelete?.name}</strong>?
-      </p>
-      <p className="warning-text">This action cannot be undone.</p>
+        <div className="confirm-overlay">
+          <div className="confirm-box">
+            <h3>Delete Project?</h3>
+            <p>
+              Are you sure you want to delete{" "}
+              <strong>{projectToDelete?.name}</strong>?
+            </p>
+            <p className="warning-text">This action cannot be undone.</p>
 
-      <div className="confirm-actions">
-        <button
-          className="cancel-btn"
-          onClick={() => {
-            setShowConfirm(false);
-            setProjectToDelete(null);
-          }}
-        >
-          Cancel
-        </button>
+            <div className="confirm-actions">
+              <button
+                className="cancel-btn"
+                onClick={() => {
+                  setShowConfirm(false);
+                  setProjectToDelete(null);
+                }}
+              >
+                Cancel
+              </button>
 
-        <button
-          className="delete-btn"
-          onClick={() => {
-            deleteProject(projectToDelete._id);
-            setShowConfirm(false);
-            setProjectToDelete(null);
-          }}
-        >
-          Delete
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-
+              <button
+                className="delete-btn"
+                onClick={() => {
+                  deleteProject(projectToDelete._id);
+                  setShowConfirm(false);
+                  setProjectToDelete(null);
+                }}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

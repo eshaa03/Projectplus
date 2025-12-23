@@ -15,10 +15,10 @@ const SettingsPage = () => {
     avatar: ""
   });
   const [showConfirm, setShowConfirm] = useState(false);
-
   const [previewImage, setPreviewImage] = useState("");
 
-  // Load user data
+  const API_URL = process.env.REACT_APP_API_URL;
+
   useEffect(() => {
     if (user) {
       let avatarURL = user.avatar || "";
@@ -42,7 +42,6 @@ const SettingsPage = () => {
     setProfile({ ...profile, [name]: value });
   };
 
-  // Image validation
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -59,13 +58,10 @@ const SettingsPage = () => {
     }
 
     const reader = new FileReader();
-    reader.onloadend = () => {
-      setPreviewImage(reader.result);
-    };
+    reader.onloadend = () => setPreviewImage(reader.result);
     reader.readAsDataURL(file);
   };
 
-  // FORM VALIDATION
   const validateForm = () => {
     if (!profile.name.trim()) {
       toast.error("Name is required");
@@ -75,7 +71,6 @@ const SettingsPage = () => {
       toast.error("Name must be at least 3 characters");
       return false;
     }
-
     if (!profile.email.trim()) {
       toast.error("Email is required");
       return false;
@@ -85,7 +80,6 @@ const SettingsPage = () => {
       toast.error("Please enter a valid email address");
       return false;
     }
-
     if (profile.newPassword) {
       if (!profile.currentPassword) {
         toast.error("Current password is required to change password");
@@ -99,7 +93,6 @@ const SettingsPage = () => {
         return false;
       }
     }
-
     return true;
   };
 
@@ -107,23 +100,20 @@ const SettingsPage = () => {
     if (!validateForm()) return;
 
     try {
-      const res = await fetch(
-        `http://localhost:5000/api/settings/update/${user._id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            name: profile.name,
-            email: profile.email,
-            avatar: previewImage,
-            currentPassword: profile.currentPassword,
-            newPassword: profile.newPassword,
-          }),
-        }
-      );
+      const res = await fetch(`${API_URL}/api/settings/update/${user._id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          name: profile.name,
+          email: profile.email,
+          avatar: previewImage,
+          currentPassword: profile.currentPassword,
+          newPassword: profile.newPassword,
+        }),
+      });
 
       let updated;
       try {
@@ -228,9 +218,7 @@ const SettingsPage = () => {
         <div className="confirm-overlay">
           <div className="confirm-box">
             <h3>Save Changes?</h3>
-            <p>
-              Are you sure you want to update your profile information?
-            </p>
+            <p>Are you sure you want to update your profile information?</p>
             <p className="warning-text">
               Make sure the details are correct before saving.
             </p>

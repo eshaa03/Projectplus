@@ -11,14 +11,14 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
+  const API_URL = process.env.REACT_APP_API_URL;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // ✅ Trim inputs
     const trimmedName = name.trim();
     const trimmedEmail = email.trim();
 
-    // ✅ Name validation
     if (!trimmedName) {
       toast.error("Name is required");
       return;
@@ -28,7 +28,6 @@ export default function Register() {
       return;
     }
 
-    // ✅ Email validation
     if (!trimmedEmail) {
       toast.error("Email is required");
       return;
@@ -39,7 +38,6 @@ export default function Register() {
       return;
     }
 
-    // ✅ Password validation
     if (!password) {
       toast.error("Password is required");
       return;
@@ -52,14 +50,13 @@ export default function Register() {
       return;
     }
 
-    // ✅ Confirm password
     if (password !== confirmPassword) {
       toast.error("Passwords do not match");
       return;
     }
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/register", {
+      const res = await fetch(`${API_URL}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: trimmedName, email: trimmedEmail, password }),

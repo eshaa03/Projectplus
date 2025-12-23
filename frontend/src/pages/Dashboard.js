@@ -13,6 +13,7 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 
 const Dashboard = () => {
   const { token } = useContext(UserContext);
+  const API_URL = process.env.REACT_APP_API_URL;
 
   const [taskData, setTaskData] = useState([0, 0, 0]);
   const [projectData, setProjectData] = useState([0, 0, 0]);
@@ -23,7 +24,7 @@ const Dashboard = () => {
       if (!token) return;
 
       try {
-        const res = await fetch("http://localhost:5000/api/dashboard", {
+        const res = await fetch(`${API_URL}/api/dashboard`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -55,7 +56,7 @@ const Dashboard = () => {
     };
 
     fetchDashboard();
-  }, [token]);
+  }, [token, API_URL]);
 
   const taskPie = {
     labels: ["Completed", "Ongoing", "Pending"],

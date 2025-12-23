@@ -4,26 +4,30 @@ import { useEffect, useState } from "react";
 export default function EditTask() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const API_URL = process.env.REACT_APP_API_URL;
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
   // Load existing task
   useEffect(() => {
-    fetch(`http://localhost:5000/api/tasks/${id}`)
+    fetch(`${API_URL}/api/tasks/${id}`)
       .then(res => res.json())
       .then(data => {
         setTitle(data.title);
         setDescription(data.description);
-      });
-  }, [id]);
+      })
+      .catch(err => console.error(err));
+  }, [id, API_URL]);
 
   const updateTask = () => {
-    fetch(`http://localhost:5000/api/tasks/${id}`, {
+    fetch(`${API_URL}/api/tasks/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title, description })
-    }).then(() => navigate(-1));
+    })
+      .then(() => navigate(-1))
+      .catch(err => console.error(err));
   };
 
   return (

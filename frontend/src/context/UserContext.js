@@ -1,4 +1,5 @@
 import { createContext, useState, useEffect } from "react";
+import api from "../utils/api";
 
 export const UserContext = createContext();
 
@@ -40,11 +41,8 @@ export const UserProvider = ({ children }) => {
   useEffect(() => {
     if (token && !user) {
       setLoading(true);
-      fetch("http://localhost:5000/api/auth/me", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then((res) => res.json())
-        .then((data) => {
+      api.get("/auth/me")
+        .then(({ data }) => {
           if (data.avatar && !data.avatar.startsWith("http") && !data.avatar.startsWith("data:")) {
             data.avatar = `data:image/png;base64,${data.avatar}`;
           }

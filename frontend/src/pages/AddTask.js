@@ -25,6 +25,8 @@ export default function TaskList() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState(null);
 
+  const API_URL = process.env.REACT_APP_API_URL;
+
   // Get project name from URL
   useEffect(() => {
     if (projectNameFromUrl) {
@@ -36,15 +38,15 @@ export default function TaskList() {
   useEffect(() => {
     if (!projectId) return;
 
-    fetch(`http://localhost:5000/api/tasks?projectId=${projectId}`)
+    fetch(`${API_URL}/api/tasks?projectId=${projectId}`)
       .then(res => res.json())
       .then(data => setTasks(data))
       .catch(err => console.error(err));
-  }, [projectId]);
+  }, [projectId, API_URL]);
 
   // Add task
   const addTask = () => {
-    fetch("http://localhost:5000/api/tasks", {
+    fetch(`${API_URL}/api/tasks`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -68,7 +70,7 @@ export default function TaskList() {
 };
 
 const deleteTask = () => {
-  fetch(`http://localhost:5000/api/tasks/${taskToDelete}`, {
+  fetch(`${API_URL}/api/tasks/${taskToDelete}`, {
     method: "DELETE",
   })
     .then(() => {
@@ -89,7 +91,7 @@ const deleteTask = () => {
   };
 
   const saveEdit = () => {
-    fetch(`http://localhost:5000/api/tasks/${editingId}`, {
+    fetch(`${API_URL}/api/tasks/${editingId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title, description: desc, projectId })
@@ -104,7 +106,7 @@ const deleteTask = () => {
 
   // Update status
   const updateStatus = (id, status) => {
-    fetch(`http://localhost:5000/api/tasks/status/${id}`, {
+    fetch(`${API_URL}/api/tasks/status/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status })
@@ -137,12 +139,12 @@ const deleteTask = () => {
   const filteredTasks =
     filterStatus === "ALL" ? tasks : tasks.filter(t => t.status === filterStatus);
 
-    const getEmptyMessage = () => {
-  if (filterStatus === "pending") return "No pending tasks.";
-  if (filterStatus === "in-progress") return "No ongoing tasks.";
-  if (filterStatus === "completed") return "No completed tasks.";
-  return "No tasks yet.";
-};
+  const getEmptyMessage = () => {
+    if (filterStatus === "pending") return "No pending tasks.";
+    if (filterStatus === "in-progress") return "No ongoing tasks.";
+    if (filterStatus === "completed") return "No completed tasks.";
+    return "No tasks yet.";
+  };
 
   return (
     <div className="task-page">
@@ -217,9 +219,8 @@ const deleteTask = () => {
           ))}
 
           {filteredTasks.length === 0 && (
-  <p className="no-task">{getEmptyMessage()}</p>
-)}
-
+            <p className="no-task">{getEmptyMessage()}</p>
+          )}
         </div>
       </div>
 
@@ -252,39 +253,38 @@ const deleteTask = () => {
           </div>
         </div>
       )}
+
       {showConfirm && (
-  <div className="confirm-overlay">
-    <div className="confirm-box">
-      <h3>Delete Task?</h3>
-      <p>
-        Are you sure you want to delete{" "}
-        <strong>{taskToDelete?.title}</strong>?
-      </p>
-      <p className="warning-text">This action cannot be undone.</p>
+        <div className="confirm-overlay">
+          <div className="confirm-box">
+            <h3>Delete Task?</h3>
+            <p>
+              Are you sure you want to delete{" "}
+              <strong>{taskToDelete?.title}</strong>?
+            </p>
+            <p className="warning-text">This action cannot be undone.</p>
 
-      <div className="confirm-actions">
-        <button
-          className="cancel-btn"
-          onClick={() => {
-            setShowConfirm(false);
-            setTaskToDelete(null);
-          }}
-        >
-          Cancel
-        </button>
+            <div className="confirm-actions">
+              <button
+                className="cancel-btn"
+                onClick={() => {
+                  setShowConfirm(false);
+                  setTaskToDelete(null);
+                }}
+              >
+                Cancel
+              </button>
 
-        <button
-          className="delete-btn"
-          onClick={deleteTask}
-        >
-          Delete
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-
-
+              <button
+                className="delete-btn"
+                onClick={deleteTask}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
