@@ -1,6 +1,8 @@
 import React, { useState, useContext, useEffect } from "react";
 import { UserContext } from "../context/UserContext";
 import "./SettingsPage.css";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const SettingsPage = () => {
   const { user, setUser, token, loading } = useContext(UserContext);
@@ -12,6 +14,7 @@ const SettingsPage = () => {
     newPassword: "",
     avatar: ""
   });
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const [previewImage, setPreviewImage] = useState("");
 
@@ -27,8 +30,6 @@ const SettingsPage = () => {
         ...prev,
         name: user.name,
         email: user.email,
-        currentPassword: "",
-        newPassword: "",
         avatar: avatarURL
       }));
 
@@ -41,19 +42,19 @@ const SettingsPage = () => {
     setProfile({ ...profile, [name]: value });
   };
 
-  // ✅ Image validation
+  // Image validation
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      alert("Please select a valid image file");
+      toast.error("Please select a valid image file");
       return;
     }
 
     const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
-      alert("Image size should be less than 5MB");
+      toast.error("Image size should be less than 5MB");
       return;
     }
 
@@ -64,51 +65,45 @@ const SettingsPage = () => {
     reader.readAsDataURL(file);
   };
 
-  // ✅ FORM VALIDATION
+  // FORM VALIDATION
   const validateForm = () => {
-    // Name
     if (!profile.name.trim()) {
-      alert("Name is required");
+      toast.error("Name is required");
       return false;
     }
     if (profile.name.trim().length < 3) {
-      alert("Name must be at least 3 characters");
+      toast.error("Name must be at least 3 characters");
       return false;
     }
 
-    // Email
     if (!profile.email.trim()) {
-      alert("Email is required");
+      toast.error("Email is required");
       return false;
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(profile.email)) {
-      alert("Please enter a valid email address");
+      toast.error("Please enter a valid email address");
       return false;
     }
 
-    // Password change validation
-   if (profile.newPassword) {
-  if (!profile.currentPassword) {
-    alert("Current password is required to change password");
-    return false;
-  }
-
-  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d).{6,}$/;
-  if (!passwordRegex.test(profile.newPassword)) {
-    alert(
-      "New password must be at least 6 characters and include at least one letter and one number"
-    );
-    return false;
-  }
-}
-
-
+    if (profile.newPassword) {
+      if (!profile.currentPassword) {
+        toast.error("Current password is required to change password");
+        return false;
+      }
+      const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d).{6,}$/;
+      if (!passwordRegex.test(profile.newPassword)) {
+        toast.error(
+          "New password must be at least 6 characters and include at least one letter and one number"
+        );
+        return false;
+      }
+    }
 
     return true;
   };
 
-  const handleSave = async () => {
+  const confirmSave = async () => {
     if (!validateForm()) return;
 
     try {
@@ -130,22 +125,23 @@ const SettingsPage = () => {
         }
       );
 
-          let updated;
+      let updated;
       try {
         updated = await res.json();
       } catch {
-        alert("Uploaded data is too large. Please upload a smaller image.");
+        toast.error("Uploaded data is too large. Please upload a smaller image.");
         return;
       }
 
       if (res.ok) {
-
         let updatedAvatar = updated.avatar || "";
         if (updatedAvatar && !updatedAvatar.startsWith("http") && !updatedAvatar.startsWith("data:")) {
           updatedAvatar = `data:image/png;base64,${updatedAvatar}`;
         }
 
-        setUser({ ...updated, avatar: updatedAvatar });
+        const updatedUser = { ...updated, avatar: updatedAvatar };
+        setUser(updatedUser);
+        localStorage.setItem("user", JSON.stringify(updatedUser));
         setProfile(prev => ({
           ...prev,
           currentPassword: "",
@@ -154,15 +150,14 @@ const SettingsPage = () => {
         }));
         setPreviewImage(updatedAvatar);
 
-        alert("Profile updated successfully!");
+        toast.success("Profile updated successfully!");
       } else {
-        alert(updated.message || "Failed to update profile");
+        toast.error(updated.message || "Failed to update profile");
       }
-    }catch (err) {
+    } catch (err) {
       console.error(err);
-      alert("Request failed. Image size may be too large.");
+      toast.error("Request failed. Image size may be too large.");
     }
-
   };
 
   if (loading) {
@@ -173,8 +168,14 @@ const SettingsPage = () => {
     );
   }
 
+  const handleSaveClick = () => {
+    if (!validateForm()) return;
+    setShowConfirm(true);
+  };
+
   return (
     <div className="settings-page">
+      <ToastContainer position="top-right" autoClose={3000} />
       <div className="settings-card">
         <h2>Profile Settings</h2>
 
@@ -217,9 +218,44 @@ const SettingsPage = () => {
         </div>
 
         <div className="form-buttons">
-          <button className="save-btn" onClick={handleSave}>Save Changes</button>
+          <button className="save-btn" onClick={handleSaveClick}>
+            Save Changes
+          </button>
         </div>
       </div>
+
+      {showConfirm && (
+        <div className="confirm-overlay">
+          <div className="confirm-box">
+            <h3>Save Changes?</h3>
+            <p>
+              Are you sure you want to update your profile information?
+            </p>
+            <p className="warning-text">
+              Make sure the details are correct before saving.
+            </p>
+
+            <div className="confirm-actions">
+              <button
+                className="cancel-btn"
+                onClick={() => setShowConfirm(false)}
+              >
+                Cancel
+              </button>
+
+              <button
+                className="delete-btn"
+                onClick={() => {
+                  setShowConfirm(false);
+                  confirmSave();
+                }}
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

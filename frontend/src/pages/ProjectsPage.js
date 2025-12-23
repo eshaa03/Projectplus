@@ -1,51 +1,71 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import "./ProjectsPage.css";
+import { FiX, FiFilter, FiEdit, FiTrash2, FiEye } from "react-icons/fi";
+import { AiOutlineCheck } from "react-icons/ai";
+
+
 
 function ProjectsPage() {
   const [projects, setProjects] = useState([]);
   const [newProject, setNewProject] = useState("");
   const [editId, setEditId] = useState(null);
   const [editName, setEditName] = useState("");
-
+  const [filterStatus, setFilterStatus] = useState("ALL");
+  const [openFilter, setOpenFilter] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState(null);
   // Fetch projects and tasks
-  const fetchProjects = async () => {
-    try {
-      const res = await fetch("http://localhost:5000/api/projects", {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
-      const data = await res.json();
+  const fetchProjects = useCallback(async () => {
+  try {
+    const res = await fetch("http://localhost:5000/api/projects", {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+    });
+    const data = await res.json();
 
-      // Fetch tasks for each project
-      const projectsWithStatus = await Promise.all(
-        data.map(async (proj) => {
-          const taskRes = await fetch(`http://localhost:5000/api/tasks?projectId=${proj._id}`, {
+    const projectsWithTasks = await Promise.all(
+      data.map(async (proj) => {
+        const taskRes = await fetch(
+          `http://localhost:5000/api/tasks?projectId=${proj._id}`,
+          {
             headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-          });
-          const tasks = await taskRes.json();
-
-          // Calculate project status
-          let status = "Pending";
-          if (tasks.length > 0) {
-            const allCompleted = tasks.every((t) => t.status.toLowerCase() === "completed");
-            const allPending = tasks.every((t) => t.status.toLowerCase() === "pending");
-            status = allCompleted ? "Completed" : allPending ? "Pending" : "Ongoing";
           }
+        );
+        const tasks = await taskRes.json();
+        const tasksWithProject = tasks.map((t) => ({
+          ...t,
+          projectName: proj.name,
+        }));
+
+        let status = "Pending";
+        if (tasks.length > 0) {
+          const allCompleted = tasks.every(
+            (t) => t.status.toLowerCase() === "completed"
+          );
+          const allPending = tasks.every(
+            (t) => t.status.toLowerCase() === "pending"
+          );
+          status = allCompleted
+            ? "Completed"
+            : allPending
+            ? "Pending"
+            : "Ongoing";
+        }
+
+        return { ...proj, status, tasks: tasksWithProject };
+      })
+    );
+
+    setProjects(projectsWithTasks);
+  } catch (err) {
+    console.error("Failed to fetch projects:", err);
+  }
+}, []);
 
 
-          return { ...proj, status };
-        })
-      );
-
-      setProjects(projectsWithStatus);
-    } catch (err) {
-      console.error("Failed to fetch projects:", err);
-    }
-  };
-
-  useEffect(() => {
-    fetchProjects();
-  }, []);
+useEffect(() => {
+  fetchProjects();
+}, [fetchProjects]);
 
   const addProject = async () => {
     if (!newProject.trim()) return;
@@ -60,7 +80,7 @@ function ProjectsPage() {
       });
       await res.json();
       setNewProject("");
-      fetchProjects(); // Refresh project list
+      fetchProjects();
     } catch (err) {
       console.error("Failed to add project:", err);
     }
@@ -100,18 +120,80 @@ function ProjectsPage() {
       console.error("Failed to update project:", err);
     }
   };
+
   const getStatusColor = (status) => {
-  if (status === "Completed") return "#10B981"; // Green
-  if (status === "Ongoing") return "#F59E0B";   // Yellow/Orange
-  if (status === "Pending") return "#EF4444";   // Red
-  return "#6B7280"; // Default Gray
+    if (status === "Completed") return "#10B981";
+    if (status === "Ongoing") return "#F59E0B";
+    if (status === "Pending") return "#EF4444";
+    return "#6B7280";
+  };
+
+  const filteredProjects =
+    filterStatus === "ALL"
+      ? projects
+      : projects.filter((p) => p.status === filterStatus);
+
+  const getEmptyProjectMessage = () => {
+  if (filterStatus === "Completed") return "No completed projects.";
+  if (filterStatus === "Ongoing") return "No ongoing projects.";
+  if (filterStatus === "Pending") return "No pending projects.";
+  return "No projects yet.";
 };
 
 
   return (
     <div className="projects-page">
       <div className="projects-card">
-        <h2 className="projects-title">Projects</h2>
+        <div className="projects-header">
+          <h2 className="projects-title">Projects</h2>
+
+          <div className="filter-wrapper">
+            <button
+              className="filter-btn"
+              title="Filter"
+              onClick={() => setOpenFilter(!openFilter)}
+            >
+              <FiFilter />
+            </button>
+
+            {openFilter && (
+              <div className="filter-dropdown">
+                <button
+                  onClick={() => {
+                    setFilterStatus("ALL");
+                    setOpenFilter(false);
+                  }}
+                >
+                  All
+                </button>
+                <button
+                  onClick={() => {
+                    setFilterStatus("Completed");
+                    setOpenFilter(false);
+                  }}
+                >
+                  Completed
+                </button>
+                <button
+                  onClick={() => {
+                    setFilterStatus("Ongoing");
+                    setOpenFilter(false);
+                  }}
+                >
+                  Ongoing
+                </button>
+                <button
+                  onClick={() => {
+                    setFilterStatus("Pending");
+                    setOpenFilter(false);
+                  }}
+                >
+                  Pending
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* Add Project */}
         <div className="add-project">
@@ -120,13 +202,18 @@ function ProjectsPage() {
             placeholder="New project name"
             value={newProject}
             onChange={(e) => setNewProject(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                addProject();
+              }
+            }}
           />
           <button onClick={addProject}>Add Project</button>
         </div>
 
         {/* List Projects */}
         <div className="projects-list">
-          {projects.map((project) => (
+          {filteredProjects.map((project) => (
             <div key={project._id} className="project-card">
               {editId === project._id ? (
                 <>
@@ -135,7 +222,36 @@ function ProjectsPage() {
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
                   />
-                  <button onClick={() => saveEdit(project._id)}>Save</button>
+                  <div className="edit-buttons">
+                    <button
+                      className="save-btn"
+                      onClick={() => saveEdit(project._id)}
+                      title="Save"
+                    >
+                      <AiOutlineCheck />
+                    </button>
+                    <button
+                      className="cancel-btn"
+                      onClick={() => {
+                        setEditId(null);
+                        setEditName("");
+                      }}
+                      title="Cancel"
+                    >
+                      <FiX />
+                    </button>
+                  </div>
+                  <p>
+                    <strong>Status:</strong>{" "}
+                    <span
+                      style={{
+                        color: getStatusColor(project.status),
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {project.status}
+                    </span>
+                  </p>
                 </>
               ) : (
                 <>
@@ -145,13 +261,12 @@ function ProjectsPage() {
                     <span
                       style={{
                         color: getStatusColor(project.status),
-                        fontWeight: "bold"
+                        fontWeight: "bold",
                       }}
                     >
-                    {project.status}
+                      {project.status}
                     </span>
                   </p>
-
                 </>
               )}
 
@@ -159,21 +274,77 @@ function ProjectsPage() {
                 <strong>Created:</strong>{" "}
                 {new Date(project.createdAt).toLocaleString()}
               </p>
-              
 
               <div className="project-actions">
-                <Link to={`/tasks?projectId=${project._id}&projectName=${encodeURIComponent(project.name)}`}>
-                <button>View Tasks</button>
+                <Link
+                  to={`/tasks?projectId=${project._id}&projectName=${encodeURIComponent(
+                    project.name
+                  )}`}
+                >
+                  <button title="View Tasks">
+                    <FiEye />
+                  </button>
                 </Link>
 
-                <button onClick={() => startEditing(project)}>Edit</button>
-                <button onClick={() => deleteProject(project._id)}>Delete</button>
+                <button title="Edit Project" onClick={() => startEditing(project)}>
+                  <FiEdit />
+                </button>
+
+                <button
+                      title="Delete Project"
+                      onClick={() => {
+                        setProjectToDelete(project);
+                        setShowConfirm(true);
+                      }}
+                    >
+                  <FiTrash2 />
+                </button>
+
               </div>
             </div>
           ))}
-          {projects.length === 0 && <p className="no-task">No projects yet.</p>}
+          {filteredProjects.length === 0 && (
+  <p className="no-task">{getEmptyProjectMessage()}</p>
+)}
+
         </div>
       </div>
+      {showConfirm && (
+  <div className="confirm-overlay">
+    <div className="confirm-box">
+      <h3>Delete Project?</h3>
+      <p>
+        Are you sure you want to delete{" "}
+        <strong>{projectToDelete?.name}</strong>?
+      </p>
+      <p className="warning-text">This action cannot be undone.</p>
+
+      <div className="confirm-actions">
+        <button
+          className="cancel-btn"
+          onClick={() => {
+            setShowConfirm(false);
+            setProjectToDelete(null);
+          }}
+        >
+          Cancel
+        </button>
+
+        <button
+          className="delete-btn"
+          onClick={() => {
+            deleteProject(projectToDelete._id);
+            setShowConfirm(false);
+            setProjectToDelete(null);
+          }}
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   );
 }

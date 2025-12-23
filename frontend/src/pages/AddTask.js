@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import "./AddTask.css";
 import { useSearchParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import { FiFilter, FiEdit, FiTrash2 } from "react-icons/fi";
 
 export default function TaskList() {
   const [tasks, setTasks] = useState([]);
@@ -19,14 +20,19 @@ export default function TaskList() {
 
   const navigate = useNavigate();
 
-  // ✅ Get project name from URL
+  const [filterStatus, setFilterStatus] = useState("ALL");
+  const [showFilter, setShowFilter] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState(null);
+
+  // Get project name from URL
   useEffect(() => {
     if (projectNameFromUrl) {
       setProjectName(decodeURIComponent(projectNameFromUrl));
     }
   }, [projectNameFromUrl]);
 
-  // 🔹 Load tasks for this project
+  // Load tasks
   useEffect(() => {
     if (!projectId) return;
 
@@ -42,13 +48,9 @@ export default function TaskList() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${localStorage.getItem("token")}` // ✅ send token
+        "Authorization": `Bearer ${localStorage.getItem("token")}`
       },
-      body: JSON.stringify({
-        title,
-        description: desc,
-        projectId
-      })
+      body: JSON.stringify({ title, description: desc, projectId })
     })
       .then(res => res.json())
       .then(newTask => {
@@ -60,13 +62,23 @@ export default function TaskList() {
   };
 
   // Delete task
-  const deleteTask = (id) => {
-    fetch(`http://localhost:5000/api/tasks/${id}`, {
-      method: "DELETE"
-    }).then(() => {
-      setTasks(tasks.filter(t => t._id !== id));
-    });
-  };
+ const confirmDelete = (taskId) => {
+  setTaskToDelete(taskId);
+  setShowConfirm(true);
+};
+
+const deleteTask = () => {
+  fetch(`http://localhost:5000/api/tasks/${taskToDelete}`, {
+    method: "DELETE",
+  })
+    .then(() => {
+      setTasks(tasks.filter(t => t._id !== taskToDelete));
+      setShowConfirm(false);
+      setTaskToDelete(null);
+    })
+    .catch(err => console.error(err));
+};
+
 
   // Edit task popup
   const startEdit = (task) => {
@@ -80,11 +92,7 @@ export default function TaskList() {
     fetch(`http://localhost:5000/api/tasks/${editingId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        title,
-        description: desc,
-        projectId
-      })
+      body: JSON.stringify({ title, description: desc, projectId })
     })
       .then(res => res.json())
       .then(updated => {
@@ -113,7 +121,6 @@ export default function TaskList() {
     setEditingId(null);
   };
 
-  // ✅ Updated statusOptions with lowercase values
   const statusOptions = [
     { label: "Pending", value: "pending" },
     { label: "In Progress", value: "in-progress" },
@@ -127,23 +134,49 @@ export default function TaskList() {
     return "";
   };
 
+  const filteredTasks =
+    filterStatus === "ALL" ? tasks : tasks.filter(t => t.status === filterStatus);
+
+    const getEmptyMessage = () => {
+  if (filterStatus === "pending") return "No pending tasks.";
+  if (filterStatus === "in-progress") return "No ongoing tasks.";
+  if (filterStatus === "completed") return "No completed tasks.";
+  return "No tasks yet.";
+};
+
   return (
     <div className="task-page">
       <div className="task-page-card">
         <div className="task-header">
-          <button className="back-btn" onClick={() => navigate(-1)}>
-            ← Back
-          </button>
-
+          <button className="back-btn" onClick={() => navigate(-1)}>←</button>
           <h2>Tasks for: {projectName}</h2>
 
-          <button className="add-btn" onClick={() => setShowPopup(true)}>
-            + Add
-          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <div className="filter-wrapper">
+              <button
+                className="filter-btn"
+                title="Filter"
+                onClick={() => setShowFilter(!showFilter)}
+              >
+                <FiFilter />
+              </button>
+
+              {showFilter && (
+                <div className="filter-dropdown">
+                  <button onClick={() => { setFilterStatus("ALL"); setShowFilter(false); }}>All</button>
+                  <button onClick={() => { setFilterStatus("completed"); setShowFilter(false); }}>Completed</button>
+                  <button onClick={() => { setFilterStatus("in-progress"); setShowFilter(false); }}>Ongoing</button>
+                  <button onClick={() => { setFilterStatus("pending"); setShowFilter(false); }}>Pending</button>
+                </div>
+              )}
+            </div>
+
+            <button className="add-btn" onClick={() => setShowPopup(true)}>+ Add</button>
+          </div>
         </div>
 
         <div className="tasks-list">
-          {tasks.map(task => (
+          {filteredTasks.map(task => (
             <div className="task-card" key={task._id}>
               <div className="task-texts">
                 <h3>{task.title}</h3>
@@ -154,42 +187,39 @@ export default function TaskList() {
                   <select
                     className={`status-select ${getStatusClass(task.status)}`}
                     value={task.status}
-                    onChange={(e) =>
-                      updateStatus(task._id, e.target.value)
-                    }
+                    onChange={(e) => updateStatus(task._id, e.target.value)}
                   >
                     {statusOptions.map(s => (
-                      <option key={s.value} value={s.value}>
-                        {s.label}
-                      </option>
+                      <option key={s.value} value={s.value}>{s.label}</option>
                     ))}
                   </select>
                 </p>
 
                 <p className="dates">
                   Created: {new Date(task.createdAt).toLocaleString()}
-                  {task.editedAt &&
-                    <> | Edited: {new Date(task.editedAt).toLocaleString()}</>}
+                  {task.editedAt && <> | Edited: {new Date(task.editedAt).toLocaleString()}</>}
                 </p>
               </div>
 
               <div className="task-actions">
-                <button className="edit" onClick={() => startEdit(task)}>
-                  Edit
+                <button className="edit" onClick={() => startEdit(task)} title="Edit">
+                  <FiEdit />
                 </button>
                 <button
-                  className="delete"
-                  onClick={() => deleteTask(task._id)}
-                >
-                  Delete
+                    className="delete"
+                    onClick={() => confirmDelete(task._id)}
+                    title="Delete"
+                  >
+                  <FiTrash2 />
                 </button>
               </div>
             </div>
           ))}
 
-          {tasks.length === 0 && (
-            <p className="no-task">No tasks yet.</p>
-          )}
+          {filteredTasks.length === 0 && (
+  <p className="no-task">{getEmptyMessage()}</p>
+)}
+
         </div>
       </div>
 
@@ -212,26 +242,49 @@ export default function TaskList() {
             />
 
             <div className="popup-buttons">
-              <button
-                className="cancel"
-                onClick={() => setShowPopup(false)}
-              >
-                Cancel
-              </button>
-
+              <button className="cancel" onClick={() => setShowPopup(false)}>Cancel</button>
               {editingId ? (
-                <button className="save" onClick={saveEdit}>
-                  Save
-                </button>
+                <button className="save" onClick={saveEdit}>Save</button>
               ) : (
-                <button className="save" onClick={addTask}>
-                  Add
-                </button>
+                <button className="save" onClick={addTask}>Add</button>
               )}
             </div>
           </div>
         </div>
       )}
+      {showConfirm && (
+  <div className="confirm-overlay">
+    <div className="confirm-box">
+      <h3>Delete Task?</h3>
+      <p>
+        Are you sure you want to delete{" "}
+        <strong>{taskToDelete?.title}</strong>?
+      </p>
+      <p className="warning-text">This action cannot be undone.</p>
+
+      <div className="confirm-actions">
+        <button
+          className="cancel-btn"
+          onClick={() => {
+            setShowConfirm(false);
+            setTaskToDelete(null);
+          }}
+        >
+          Cancel
+        </button>
+
+        <button
+          className="delete-btn"
+          onClick={deleteTask}
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+
     </div>
   );
 }

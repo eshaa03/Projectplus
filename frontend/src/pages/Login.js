@@ -1,6 +1,8 @@
 import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import "./Login.css";
 
 export default function Login() {
@@ -9,28 +11,26 @@ export default function Login() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    setError("");
+    const trimmedEmail = email.trim();
 
-    // ✅ Basic validations
-    if (!email.trim()) {
-      setError("Email is required");
+    // ✅ Validations
+    if (!trimmedEmail) {
+      toast.error("Email is required");
       return;
     }
 
-    // ✅ Email format check
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setError("Invalid email format");
+    if (!emailRegex.test(trimmedEmail)) {
+      toast.error("Invalid email format");
       return;
     }
 
     if (!password) {
-      setError("Password is required");
+      toast.error("Password is required");
       return;
     }
 
@@ -38,36 +38,32 @@ export default function Login() {
       const res = await fetch("http://localhost:5000/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: trimmedEmail, password }),
       });
 
       const data = await res.json();
 
       if (res.ok) {
-        // Save token and user info in localStorage
         localStorage.setItem("token", data.token);
         setToken(data.token);
-
-        setUser(data.user); // update UserContext with logged-in user
-
-        // Redirect to dashboard
-        navigate("/dashboard");
+        setUser(data.user);
+        toast.success("Login successful! Redirecting...");
+        setTimeout(() => navigate("/dashboard"), 1000);
       } else {
-        setError(data.message || "Login failed");
+        toast.error(data.message || "Login failed");
       }
     } catch (err) {
-      setError("Server error");
       console.error(err);
+      toast.error("Server error. Please try again later.");
     }
   };
 
   return (
     <div className="login-page">
+      <ToastContainer position="top-right" autoClose={3000} />
       <div className="login-card">
         <h2 className="login-title">Welcome back</h2>
         <p className="login-subtitle">Please login to your account</p>
-
-        {error && <p className="error-text">{error}</p>}
 
         <form className="login-form" onSubmit={handleSubmit}>
           <div className="input-group">
@@ -99,7 +95,7 @@ export default function Login() {
 
         <p className="signup-text">
           Don’t have an account?{" "}
-          <span onClick={() => navigate("/register")}>Create one</span>
+          <span onClick={() => navigate("/register")}>Create account</span>
         </p>
       </div>
     </div>

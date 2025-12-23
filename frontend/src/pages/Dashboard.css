@@ -1,4 +1,4 @@
-/* SAME OUTER WRAPPER AS TASK PAGE */
+/* Page wrapper - same as projects page */
 .dashboard-page {
   background-color: #f5f5f5;
   min-height: 100vh;
@@ -11,6 +11,7 @@
   margin-top: 1rem;
 }
 
+/* Card container - same as projects card */
 .dashboard-page-card {
   background: linear-gradient(180deg, #ffffff 0%, #e9efff 100%);
   width: calc(100% + 10px);
@@ -28,9 +29,11 @@
 
 /* Dashboard Heading */
 .dashboard-page-card h1 {
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 20px;
   color: #004a8f;
-  font-weight: 600;
-  margin-bottom: 25px;
 }
 
 /* Cards Layout */
@@ -38,6 +41,7 @@
   display: flex;
   gap: 20px;
   flex-wrap: wrap;
+  justify-content: center;
 }
 
 .card {
@@ -48,11 +52,13 @@
   border-radius: 14px;
   text-align: center;
   box-shadow: 0 2px 15px rgba(0,0,0,0.1);
-  transition: 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: default;
 }
 
 .card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
 }
 
 /* Card Colors */
@@ -66,17 +72,22 @@
 .graph-section {
   margin-top: 40px;
   display: flex;
-  gap: 25px;
   flex-wrap: wrap;
+  gap: 25px;
+  justify-content: center;
 }
 
 .graph-box {
-  flex: 1;
-  min-width: 350px;
+  flex: 1 1 300px;
+  max-width: 400px;
+  min-height: 300px;
   background: #fff;
   padding: 25px;
   border-radius: 16px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .graph-box h3 {
@@ -98,26 +109,24 @@
   font-weight: 600;
   font-size: 18px;
 }
-.graph-section {
+
+/* Responsive */
+@media (max-width: 768px) {
+  .cards {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .graph-box {
+    max-width: 90%;
+  }
+}
+.main-container {
   display: flex;
-  flex-wrap: wrap;
-  gap: 20px; /* space between charts */
-  justify-content: center;
+  align-items: stretch; /* makes children same height */
+  min-height: 100vh;
 }
 
-.graph-box {
-  flex: 1 1 300px; /* grow/shrink, min-width 300px */
-  max-width: 400px;
-  min-height: 300px; /* use min-height instead of fixed height */
-  background: #fff;
-  padding: 25px;
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-  box-sizing: border-box; /* includes padding in size */
+.page-wrapper {
+  flex: 1; /* takes remaining width */
 }
-
-
-
-
-
-

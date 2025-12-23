@@ -3,7 +3,7 @@ const Project = require("../modals/ProjectPageModal");
 // GET all projects for a specific user
 exports.getProjects = async (req, res) => {
   try {
-    const userId = req.userId; // get from request (middleware or front-end)
+    const userId = req.userId; // ✅ matches middleware
     const projects = await Project.find({ user: userId }).sort({ createdAt: -1 });
     res.json(projects);
   } catch (err) {

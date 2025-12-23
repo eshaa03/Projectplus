@@ -30,21 +30,20 @@ const Dashboard = () => {
         if (!res.ok) throw new Error("Failed to fetch dashboard data");
 
         const data = await res.json();
-        console.log("Dashboard API Response:", data);
 
-        // ✅ TASK DATA (matches backend response)
+        // TASK DATA
         setTaskData([
           data.tasks?.completed || 0,
-          data.tasks?.pending || 0,
           data.tasks?.ongoing || 0,
+          data.tasks?.pending || 0,
         ]);
 
-        // ✅ PROJECT DATA (matches backend response)
+        // PROJECT DATA
         setProjectData([
-          data.projects.completed,
-          data.projects.inProgress,
-          data.projects.notStarted
-        ]);   
+          data.projects.completed || 0,
+          data.projects.inProgress || 0,
+          data.projects.notStarted || 0
+        ]);
 
         setTotalProjects(data.projects?.total || 0);
       } catch (err) {
@@ -59,33 +58,41 @@ const Dashboard = () => {
   }, [token]);
 
   const taskPie = {
-    labels: ["Completed", "Pending", "Ongoing"],
+    labels: ["Completed", "Ongoing", "Pending"],
     datasets: [
       {
         data: taskData,
-        backgroundColor: ["#10B981", "#F59E0B", "#3B82F6"],
+        backgroundColor: ["#10B981", "#3B82F6", "#F59E0B"],
       },
     ],
   };
 
   const projectPie = {
-    labels: ["Completed", "In Progress", "Pending"],
+    labels: ["Completed", "Ongoing", "Pending"],
     datasets: [
       {
         data: projectData,
-        backgroundColor: ["#10B981", "#3B82F6", "#EF4444"],
+        backgroundColor: ["#10B981", "#3B82F6", "#F59E0B"],
       },
     ],
   };
 
+  const pieOptions = {
+    responsive: true,
+    plugins: {
+      legend: { position: "bottom" },
+      tooltip: { enabled: true },
+    },
+  };
+
   return (
-    <div className="task-page">
-      <div className="task-page-card">
+    <div className="dashboard-page">
+      <div className="dashboard-page-card">
         <h1>Dashboard Overview</h1>
 
         {/* INFO CARDS */}
         <div className="cards">
-          <div className="card blue">
+          <div className="card purple">
             <h2>Total Projects</h2>
             <p>{totalProjects}</p>
           </div>
@@ -93,26 +100,26 @@ const Dashboard = () => {
             <h2>Completed Tasks</h2>
             <p>{taskData[0]}</p>
           </div>
-          <div className="card yellow">
-            <h2>Pending Tasks</h2>
+          <div className="card blue">
+            <h2>Ongoing Tasks</h2>
             <p>{taskData[1]}</p>
           </div>
-          <div className="card purple">
-            <h2>Ongoing Tasks</h2>
+          <div className="card yellow">
+            <h2>Pending Tasks</h2>
             <p>{taskData[2]}</p>
           </div>
         </div>
 
         {/* PIE CHARTS */}
         <div className="graph-section">
-          <div className="graph-box fixed">
+          <div className="graph-box">
             <h3>Tasks Status</h3>
-            <Pie data={taskPie} />
+            <Pie data={taskPie} options={pieOptions} />
           </div>
 
-          <div className="graph-box fixed">
+          <div className="graph-box">
             <h3>Projects Status</h3>
-            <Pie data={projectPie} />
+            <Pie data={projectPie} options={pieOptions} />
           </div>
         </div>
       </div>

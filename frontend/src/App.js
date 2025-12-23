@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { BrowserRouter, Routes, Route, Outlet, Navigate } from "react-router-dom";
-import { UserContext } from "./context/UserContext";
-
+import { UserProvider } from "./context/UserContext";  // Your existing one ✅
+import { SearchProvider } from "./context/SearchContext";  // Your existing one ✅
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
@@ -11,6 +11,10 @@ import EditTask from "./pages/EditTask";
 import SettingsPage from "./pages/SettingsPage";
 import MainLayout from "./components/MainLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
+
+// ✅ Import toast
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function ProtectedLayoutWrapper() {
   return (
@@ -23,70 +27,38 @@ function ProtectedLayoutWrapper() {
 }
 
 function App() {
-  const [token, setToken] = useState(() => localStorage.getItem("token") || null);
-  const [user, setUser] = useState(() => {
-    const storedUser = localStorage.getItem("user");
-    return storedUser ? JSON.parse(storedUser) : null;
-  });
-
-  // ✅ FIX: restore user on page refresh
-  useEffect(() => {
-    const fetchUser = async () => {
-      if (token && !user) {
-        try {
-          const res = await fetch("http://localhost:5000/api/auth/me", {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-
-          if (res.ok) {
-            const data = await res.json();
-
-            if (
-              data.avatar &&
-              !data.avatar.startsWith("http") &&
-              !data.avatar.startsWith("data:")
-            ) {
-              data.avatar = `data:image/png;base64,${data.avatar}`;
-            }
-
-            setUser(data);
-            localStorage.setItem("user", JSON.stringify(data));
-          } else {
-            setUser(null);
-            setToken(null);
-            localStorage.removeItem("user");
-            localStorage.removeItem("token");
-          }
-        } catch {
-          setUser(null);
-          setToken(null);
-          localStorage.removeItem("user");
-          localStorage.removeItem("token");
-        }
-      }
-    };
-
-    fetchUser();
-  }, [token, user]);
-
   return (
-    <UserContext.Provider value={{ user, setUser, token, setToken }}>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+    <UserProvider>           {/* ✅ Your existing UserProvider */}
+      <SearchProvider>       {/* ✅ Your existing SearchProvider */}
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route element={<ProtectedLayoutWrapper />}>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/projects" element={<ProjectsPage />} />
+              <Route path="/tasks" element={<AddTask />} />
+              <Route path="/tasks/edit/:id" element={<EditTask />} />
+              <Route path="/settings" element={<SettingsPage />} />
+              <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            </Route>
+          </Routes>
 
-          <Route element={<ProtectedLayoutWrapper />}>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/projects" element={<ProjectsPage />} />
-            <Route path="/tasks" element={<AddTask />} />
-            <Route path="/tasks/edit/:id" element={<EditTask />} />
-            <Route path="/settings" element={<SettingsPage />} />
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    </UserContext.Provider>
+          {/* ✅ Toast Container */}
+          <ToastContainer
+            position="top-right"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            pauseOnHover
+            draggable
+            pauseOnFocusLoss
+            theme="colored"
+          />
+        </BrowserRouter>
+      </SearchProvider>
+    </UserProvider>
   );
 }
 

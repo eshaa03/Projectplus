@@ -88,10 +88,10 @@
 }
 
 /* Buttons */
-.form-buttons {
-  display: flex;
-  gap: 12px;
-  margin-top: 10px;
+.form-buttons button {
+  width: auto;              /* fits text */
+  padding: 10px 24px;       /* controls length */
+  white-space: nowrap;      /* prevents text breaking */
 }
 
 .save-btn {
@@ -121,4 +121,13 @@
 
 .cancel-btn:hover {
   background-color: #6b7280;
+}
+.main-container {
+  display: flex;
+  align-items: stretch; /* makes children same height */
+  min-height: 100vh;
+}
+
+.page-wrapper {
+  flex: 1; /* takes remaining width */
 }

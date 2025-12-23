@@ -100,6 +100,8 @@
 
 .login-btn:hover {
   background: linear-gradient(90deg, #2563eb, #7e22ce);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(59, 130, 246, 0.35);
 }
 
 /* Bottom text */
