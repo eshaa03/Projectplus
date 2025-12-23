@@ -29,74 +29,8 @@ const Navbar = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [setSearch]);
- const handleSearchKeyDown = (e) => {
-  if (!filteredResults.length) return;
 
-  if (e.key === "ArrowDown") {
-    e.preventDefault();
-    setActiveIndex((prev) =>
-      prev < filteredResults.length - 1 ? prev + 1 : 0
-    );
-  }
-
-  if (e.key === "ArrowUp") {
-    e.preventDefault();
-    setActiveIndex((prev) =>
-      prev > 0 ? prev - 1 : filteredResults.length - 1
-    );
-  }
-
-  if (e.key === "Enter") {
-    e.preventDefault();
-    const item =
-      activeIndex >= 0
-        ? filteredResults[activeIndex]
-        : filteredResults[0];
-
-    setSearch("");
-
-    if (item.type === "project") {
-      navigate(
-        `/tasks?projectId=${item.id}&projectName=${encodeURIComponent(item.name)}`
-      );
-    } else {
-      navigate(
-        `/tasks?projectId=${item.projectId}&projectName=${encodeURIComponent(
-          item.projectName
-        )}`
-      );
-    }
-  }
-};
-
-
-  if (loading) return <div className="navbar">Loading...</div>;
-
-  if (!user)
-    return (
-      <div className="navbar">
-        <div className="navbar-left" />
-        <div className="navbar-right" />
-      </div>
-    );
-
-  const handleLogout = () => {
-    setUser(null);
-    setToken(null);
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setSearch(""); // clear search bar
-    setProjects([]); // clear search results immediately
-    navigate("/");
-  };
-
-  const highlightMatch = (text) => {
-    if (!search) return text;
-    const regex = new RegExp(`(${search})`, "gi");
-    const highlighted = text.replace(regex, `<span class="highlight-text">$1</span>`);
-    return <span dangerouslySetInnerHTML={{ __html: highlighted }} />;
-  };
-
+  // ✅ MOVED UP — no logic change
   const filteredResults =
     !searchLoading && search
       ? projects
@@ -113,13 +47,83 @@ const Navbar = () => {
           .filter((item) => item.name.toLowerCase().includes(search.toLowerCase()))
       : [];
 
+  const handleSearchKeyDown = (e) => {
+    if (!filteredResults.length) return;
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiveIndex((prev) =>
+        prev < filteredResults.length - 1 ? prev + 1 : 0
+      );
+    }
+
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActiveIndex((prev) =>
+        prev > 0 ? prev - 1 : filteredResults.length - 1
+      );
+    }
+
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const item =
+        activeIndex >= 0
+          ? filteredResults[activeIndex]
+          : filteredResults[0];
+
+      setSearch("");
+
+      if (item.type === "project") {
+        navigate(
+          `/tasks?projectId=${item.id}&projectName=${encodeURIComponent(item.name)}`
+        );
+      } else {
+        navigate(
+          `/tasks?projectId=${item.projectId}&projectName=${encodeURIComponent(
+            item.projectName
+          )}`
+        );
+      }
+    }
+  };
+
+  if (loading) return <div className="navbar">Loading...</div>;
+
+  if (!user)
+    return (
+      <div className="navbar">
+        <div className="navbar-left" />
+        <div className="navbar-right" />
+      </div>
+    );
+
+  const handleLogout = () => {
+    setUser(null);
+    setToken(null);
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setSearch("");
+    setProjects([]);
+    navigate("/");
+  };
+
+  const highlightMatch = (text) => {
+    if (!search) return text;
+    const regex = new RegExp(`(${search})`, "gi");
+    const highlighted = text.replace(
+      regex,
+      `<span class="highlight-text">$1</span>`
+    );
+    return <span dangerouslySetInnerHTML={{ __html: highlighted }} />;
+  };
+
   return (
     <div className="navbar">
       <div className="navbar-left" />
 
       {/* 🔍 Search box */}
       <div className="navbar-search" ref={searchRef}>
-        <FiSearch className="search-icon" /> {/* SVG icon inside input */}
+        <FiSearch className="search-icon" />
         <input
           type="text"
           placeholder="Search projects or tasks..."
@@ -136,26 +140,27 @@ const Navbar = () => {
             {filteredResults.length > 0 ? (
               filteredResults.map((item, index) => (
                 <div
-  key={item.type + item.id}
-  className={`search-item ${
-    index === activeIndex ? "active" : ""
-  }`}
-  onClick={() => {
-    setSearch("");
-    if (item.type === "project") {
-      navigate(
-        `/tasks?projectId=${item.id}&projectName=${encodeURIComponent(item.name)}`
-      );
-    } else {
-      navigate(
-        `/tasks?projectId=${item.projectId}&projectName=${encodeURIComponent(
-          item.projectName
-        )}`
-      );
-    }
-  }}
->
-
+                  key={item.type + item.id}
+                  className={`search-item ${
+                    index === activeIndex ? "active" : ""
+                  }`}
+                  onClick={() => {
+                    setSearch("");
+                    if (item.type === "project") {
+                      navigate(
+                        `/tasks?projectId=${item.id}&projectName=${encodeURIComponent(
+                          item.name
+                        )}`
+                      );
+                    } else {
+                      navigate(
+                        `/tasks?projectId=${item.projectId}&projectName=${encodeURIComponent(
+                          item.projectName
+                        )}`
+                      );
+                    }
+                  }}
+                >
                   {highlightMatch(item.name)}
                   {item.type === "task" && (
                     <span className="task-project">({item.projectName})</span>
