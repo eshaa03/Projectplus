@@ -1,0 +1,13 @@
+# Dependencies
+node_modules/
+
+# Environment variables
+.env
+
+# Logs (optional but safe)
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files (Windows)
+Thumbs.db
