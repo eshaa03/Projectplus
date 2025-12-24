@@ -11,3 +11,5 @@ yarn-error.log*
 
 # OS files (Windows)
 Thumbs.db
+# Firebase local cache
+frontend/.firebase/
